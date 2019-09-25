@@ -1,0 +1,362 @@
+﻿Build1=Default,b4a.example
+File1=back sound ok.wav
+File10=s.png
+File11=start-button-png-12.png
+File12=w1.png
+File13=w2.png
+File14=w3.png
+File15=w4.png
+File2=c.png
+File3=click.png
+File4=f.png
+File5=jump cartoon ok.wav
+File6=Main.bal
+File7=metal-hexagon-grid-black-background_5205-69.jpg
+File8=moon_PNG19.png
+File9=press.png
+FileGroup1=Default Group
+FileGroup10=Default Group
+FileGroup11=Default Group
+FileGroup12=Default Group
+FileGroup13=Default Group
+FileGroup14=Default Group
+FileGroup15=Default Group
+FileGroup2=Default Group
+FileGroup3=Default Group
+FileGroup4=Default Group
+FileGroup5=Default Group
+FileGroup6=Default Group
+FileGroup7=Default Group
+FileGroup8=Default Group
+FileGroup9=Default Group
+Group=Default Group
+IconFile=
+Library1=core
+Library2=audio
+ManifestCode='This code will be applied to the manifest file during compilation.~\n~'You do not need to modify it in most cases.~\n~'See this link for for more information: https://www.b4x.com/forum/showthread.php?p=78136~\n~AddManifestText(~\n~<uses-sdk android:minSdkVersion="5" android:targetSdkVersion="26"/>~\n~<supports-screens android:largeScreens="true" ~\n~    android:normalScreens="true" ~\n~    android:smallScreens="true" ~\n~    android:anyDensity="true"/>)~\n~SetApplicationAttribute(android:icon, "@drawable/icon")~\n~SetApplicationAttribute(android:label, "$LABEL$")~\n~CreateResourceFromFile(Macro, Themes.DarkTheme)~\n~'End of default text.~\n~
+Module1=Starter
+NumberOfFiles=15
+NumberOfLibraries=2
+NumberOfModules=1
+Version=9.3
+@EndOfDesignText@
+#Region  Project Attributes 
+	#ApplicationLabel: Jump Game
+	#VersionCode: 1
+	#VersionName: 
+	'SupportedOrientations possible values: unspecified, landscape or portrait.
+	#SupportedOrientations: landscape
+	#CanInstallToExternalStorage: False
+#End Region
+
+#Region  Activity Attributes 
+	#FullScreen: False
+	#IncludeTitle: False
+#End Region
+
+Sub Process_Globals
+	'These global variables will be declared once when the application starts.
+	'These variables can be accessed from all modules.
+	Dim T1,TimerButtonSlidingDown As Timer
+	Dim MPBackSound As MediaPlayer
+
+End Sub
+
+Sub Globals
+	'These global variables will be redeclared each time the activity is created.
+	'These variables can only be accessed from this module.
+
+	Private ImageViewH As ImageView
+	Dim ImgH1, ImgH2, ImgH3, ImgH4 As ImageView
+	
+	Dim H As Byte = 0
+	Dim Object_Move As Byte
+	Dim Score_Val As Byte
+	Dim TopImgH, LeftImgC, LeftImgF, LeftImgFF As Int
+	
+	Private ButtonJump As Button
+	Private ButtonSliding As Button
+	Private ImageViewC As ImageView
+	Private ImageViewSliding As ImageView
+	Private LabelScore As Label
+	
+	Dim Jump_Fly As Boolean
+	Dim Fail As Boolean = False
+	Dim Finish As Boolean = False
+	Private ImageViewF As ImageView
+	Private ImageViewFF As ImageView
+	
+	
+	Private LabelStart As Label
+	Private ButtonStart As Button
+	
+	Dim SoundJump As SoundPool
+	Dim loadid As Int
+	Dim Speed As Int = -8dip
+End Sub
+
+Sub Activity_Create(FirstTime As Boolean)
+	'Do not forget to load the layout file created with the visual designer. For example:
+	'Activity.LoadLayout("Layout1")
+	Activity.LoadLayout("Main")
+	
+	ImgH1.Initialize("")
+	ImgH2.Initialize("")
+	ImgH3.Initialize("")
+	ImgH4.Initialize("")
+	ImgH1.Bitmap=LoadBitmap(File.DirAssets,"w1.png")
+	ImgH2.Bitmap=LoadBitmap(File.DirAssets,"w2.png")
+	ImgH3.Bitmap=LoadBitmap(File.DirAssets,"w3.png")
+	ImgH4.Bitmap=LoadBitmap(File.DirAssets,"w4.png")
+	
+	T1.Initialize("T1",150)
+	T1.Enabled=True
+	
+	TimerButtonSlidingDown.Initialize("TimerButtonSlidingDown",10)
+	TopImgH=ImageViewH.Top
+	
+	ImageViewC.Left=100%x+ImageViewC.Width
+	LeftImgC=ImageViewC.Left
+	
+	ImageViewF.Left=100%x+ImageViewF.Width
+	LeftImgF=ImageViewF.Left
+	
+	ImageViewFF.Left = 100%x + ImageViewFF.Width
+	LeftImgFF = ImageViewFF.Left
+	
+	ImageViewSliding.Left=ImageViewH.Left
+	ImageViewSliding.Visible=False
+	
+	SoundJump.Initialize(1)
+	loadid=SoundJump.Load(File.DirAssets, "jump cartoon ok.wav")
+	SoundJump.Play(loadid,1,1,10,0,0)
+	
+End Sub
+
+Sub Activity_Resume
+ 
+End Sub
+
+Sub Activity_Pause (UserClosed As Boolean)
+	ExitApplication
+End Sub
+
+Sub T1_Tick 'to manpulate blue object to make them look running
+	H = H + 1
+	Select H
+		Case 1
+			ImageViewH.Bitmap = ImgH1.Bitmap
+		Case 2
+			ImageViewH.Bitmap = ImgH2.Bitmap
+		Case 3
+			ImageViewH.Bitmap = ImgH3.Bitmap
+		Case 4
+			ImageViewH.Bitmap = ImgH2.Bitmap
+			H = 0
+	End Select
+End Sub
+
+Sub Cek 'to chek wheter blue object collide with passing object
+
+	If Jump_Fly = False Then
+		If ImageViewC.Left <= ImageViewH.Left + ImageViewH.Width Then
+			Fail = True
+		End If
+		
+		If ImageViewFF.Left <= ImageViewH.Left + ImageViewH.Width Then
+			Fail = True
+		End If
+	Else
+		For i = ImageViewH.Left To ImageViewH.Width Step 1
+			If ImageViewC.Left = i Then
+				If ImageViewH.Top + ImageViewH.Height >= ImageViewC.Top Then
+					Fail = True
+				End If
+			End If
+			
+			If ImageViewFF.Left = i Then
+				If ImageViewH.Top + ImageViewH.Height >= ImageViewFF.Top Then
+					Fail = True
+				End If
+			End If
+		Next
+		
+	End If
+	If ImageViewH.Visible = True And ImageViewSliding.Visible = False Then
+		If ImageViewF.Left <= ImageViewH.Left + ImageViewH.Width Then
+			Fail = True
+		End If
+	End If
+	Sleep(1)
+	Cek
+End Sub
+
+Sub TimerButtonSlidingDown_Tick
+	ImageViewH.Visible = False
+	ImageViewSliding.Visible = True
+End Sub
+
+Sub Fly 'to make blue object fly/jump
+	ButtonJump.Enabled = False
+	ImageViewH.Bitmap = ImgH2.Bitmap
+	T1.Enabled = False
+	
+	For i = ImageViewH.Top To 10dip Step -8dip
+		ImageViewH.Top = i
+		Sleep(3)
+	Next
+	
+	ImageViewH.Top = ImageViewH.Top
+	Sleep(10)
+	T1.Enabled = True
+	
+	For i = 10dip To TopImgH Step 5dip
+		ImageViewH.Top = i
+		Sleep(3)
+	Next
+	
+	T1.Enabled = True
+	ButtonJump.Enabled = True
+	Jump_Fly = False
+End Sub
+
+Sub C_Move 'to make red and green object run towards blue object
+	Object_Move = Rnd(1, 4)
+	
+	If Score_Val < 20 Then Speed = -8dip
+	If Score_Val > 20 And Score_Val < 29 Then Speed = -9dip
+	If Score_Val > 30 And Score_Val < 39 Then Speed = -10dip
+	If Score_Val > 40 And Score_Val < 50 Then Speed = -11dip
+	
+	Select Object_Move
+		Case 1
+			For i = ImageViewC.Left To 0dip - ImageViewC.Width Step Speed
+				ImageViewC.Left = i
+				Sleep(3)
+		
+				If Fail = True Then
+					Msgbox("Your Score is : " & Score_Val, "Game Over")
+					Fail = False
+					Refresh
+					Return
+				End If
+				
+				If Finish = True Then
+					Refresh
+					Return
+				End If
+			Next
+			ImageViewC.Left = LeftImgC
+			Score
+		Case 2
+			For i = ImageViewF.Left To 0dip - ImageViewF.Width Step Speed
+				ImageViewF.Left = i
+				Sleep(3)
+		
+				If Fail = True Then
+					Msgbox("Your Score is : " & Score_Val, "Game Over")
+					Fail = False
+					Refresh
+					Return
+				End If
+				
+				If Finish = True Then
+					Refresh
+					Return
+				End If
+			Next
+			ImageViewF.Left = LeftImgF
+			Score
+		Case 3
+			For i = ImageViewFF.Left To 0dip - ImageViewFF.Width Step Speed
+				ImageViewFF.Left = i
+				Sleep(3)
+		
+				If Fail = True Then
+					Msgbox("Your Score is : " & Score_Val, "Game Over")
+					Fail = False
+					Refresh
+					Return
+				End If
+				
+				If Finish = True Then
+					Refresh
+					Return
+				End If
+			Next
+			ImageViewFF.Left = LeftImgFF
+			Score
+	End Select
+	C_Move
+End Sub
+
+Sub Score 'to calculate the score
+	If Fail = False Then
+		Score_Val = Score_Val + 1
+	End If
+	LabelScore.Text = "Score = " & Score_Val
+	
+	If Score_Val = 50 Then
+		Msgbox("Finish", "")
+		Finish = True
+		Refresh
+	End If
+	Return
+End Sub
+
+Sub Refresh 'to reset the position of all object when the game is finished and game over
+	Score_Val = 0
+	LabelScore.Text = "Score = " & Score_Val
+	ImageViewC.Left = LeftImgC
+	ImageViewF.Left = LeftImgF
+	ImageViewFF.Left = LeftImgFF
+	Sleep(1000)
+	LabelStart.Visible = True
+	ButtonStart.Visible = True
+	MPBackSound.Stop
+	Return
+End Sub
+
+Sub ButtonJump_Click
+	Jump_Fly = True
+	SoundJump.Play(loadid,1,1,50,0,0)
+	Fly
+	
+End Sub
+
+Sub ButtonSliding_Down
+	TimerButtonSlidingDown.Enabled=True
+	
+End Sub
+
+Sub ButtonSliding_Up
+	TimerButtonSlidingDown.Enabled = False
+	ImageViewSliding.Visible = False
+	ImageViewH.Visible = True
+End Sub
+
+
+
+Sub ButtonStart_Click
+	ButtonStart.Visible = False
+
+	For i = 3 To 1 Step -1
+		LabelStart.Text = i
+		Sleep(1000)
+	Next
+	
+	LabelStart.Text = "Go...!"
+	Sleep(500)
+	LabelStart.Visible = False
+	
+	MPBackSound.Initialize
+	MPBackSound.Load(File.DirAssets, "back sound ok.wav")
+	MPBackSound.Play
+	MPBackSound.Looping = True
+	
+	Finish = False
+	C_Move
+	Cek
+	Return
+	
+End Sub
